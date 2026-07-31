@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SculptX - Plataforma Inteligente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <img src="assets/logo.png" alt="SculptX Protocol" class="logo-img" style="max-width: 220px; margin: 0 auto 30px;">
+                <p class="subtitle">Seu Protocolo Personalizado</p>
+            </div>
+
+            <div class="login-content">
+                <p class="welcome-text">Treino, dieta e suplementação customizados para seu objetivo</p>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="codigo">Código de Acesso</label>
+                        <input 
+                            type="text" 
+                            id="codigo" 
+                            placeholder="Ex: ABC123XYZ" 
+                            required
+                            maxlength="20"
+                            autocomplete="off"
+                            style="text-transform: uppercase;"
+                        >
+                        <small>Enviado por email ou WhatsApp</small>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-large">
+                        Acessar Plataforma
+                    </button>
+                </form>
+
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="loadingMessage" class="loading-message" style="display: none;"></div>
+            </div>
+
+            <div class="login-footer">
+                <p>Dúvidas? Entre em contato</p>
+                <a href="https://wa.me/5538998298303" target="_blank" class="whatsapp-link">
+                    WhatsApp - Clóves
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const codigo = document.getElementById('codigo').value.toUpperCase().trim();
+            
+            if (!codigo || codigo.length < 3) {
+                mostrarErro('Digite um código válido');
+                return;
+            }
+
+            errorMessage.style.display = 'none';
+            loadingMessage.style.display = 'block';
+            loadingMessage.textContent = 'Verificando código...';
+
+            try {
+                const response = await fetch('/api/check-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo })
+                });
+
+                const data = await response.json();
+
+                if (!data.ok) {
+                    mostrarErro(data.erro || 'Código inválido');
+                    loadingMessage.style.display = 'none';
+                    return;
+                }
+
+                sessionStorage.setItem('codigo_id', data.codigo_id);
+                sessionStorage.setItem('temUsuario', data.temUsuario);
+                loadingMessage.textContent = 'Redirecionando...';
+
+                setTimeout(() => {
+                    if (data.temUsuario) {
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        window.location.href = '/onboarding.html';
+                    }
+                }, 500);
+
+            } catch (err) {
+                mostrarErro('Erro ao conectar. Verifique sua conexão.');
+                loadingMessage.style.display = 'none';
+                console.error(err);
+            }
+        });
+
+        function mostrarErro(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.style.display = 'block';
+        }
+
+        document.getElementById('codigo').focus();
+    </script>
+</body>
+</html>

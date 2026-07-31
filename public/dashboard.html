@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Protocolo - SculptX</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-top">
+                <h1>SculptX</h1>
+                <button onclick="fazerLogout()" style="background: #999; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">Sair</button>
+            </div>
+        </header>
+
+        <!-- WELCOME SECTION -->
+        <div class="dashboard-content">
+            <section class="welcome-section">
+                <div class="welcome-text">
+                    <h2>Bem-vindo, <span id="userNameDisplay">Usuário</span></h2>
+                    <p>Seu protocolo personalizado está pronto</p>
+                </div>
+                <img src="assets/cloves.png" alt="Coach" class="coach-photo">
+            </section>
+
+            <!-- STATS SECTION -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-label">Objetivo</div>
+                    <div class="stat-value" id="objectiveDisplay">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Nível</div>
+                    <div class="stat-value" id="levelDisplay">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Dias de Treino</div>
+                    <div class="stat-value" id="daysDisplay">-</div>
+                </div>
+            </section>
+
+            <!-- NUTRIÇÃO STATS -->
+            <section class="nutrition-stats">
+                <h3>Seu Protocolo Nutricional Diário</h3>
+                <div class="nutrition-grid">
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">Calorias Alvo</span>
+                        <span class="nutrition-value" id="caloriesDisplay">-</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">Proteína</span>
+                        <span class="nutrition-value" id="proteinDisplay">-</span> <span class="nutrition-unit">g</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">Carboidrato</span>
+                        <span class="nutrition-value" id="carbDisplay">-</span> <span class="nutrition-unit">g</span>
+                    </div>
+                    <div class="nutrition-item">
+                        <span class="nutrition-label">Gordura</span>
+                        <span class="nutrition-value" id="fatDisplay">-</span> <span class="nutrition-unit">g</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TOOLS SECTION -->
+            <section class="tools-section">
+                <h3>🛠️ Ferramentas do Seu Protocolo</h3>
+                
+                <div class="tools-grid">
+                    <!-- TREINO -->
+                    <div class="tool-card">
+                        <div class="tool-icon"></div>
+                        <h4>Seu Treino</h4>
+                        <p>Estruturado em fases progressivas de 2 meses</p>
+                        <button class="btn-primary" onclick="abrirAbreve('treino')">
+                            Acessar Treino →
+                        </button>
+                    </div>
+
+                    <!-- DIETA -->
+                    <div class="tool-card">
+                        <div class="tool-icon"></div>
+                        <h4>Sua Dieta</h4>
+                        <p>Com 3 opções por refeição e substituições</p>
+                        <button class="btn-primary" onclick="abrirAbreve('dieta')">
+                            Ver Dieta →
+                        </button>
+                    </div>
+
+                    <!-- SUPLEMENTAÇÃO -->
+                    <div class="tool-card">
+                        <div class="tool-icon"></div>
+                        <h4>Suplementação</h4>
+                        <p>Protocolo otimizado para seu objetivo</p>
+                        <button class="btn-primary" onclick="abrirAbreve('suplementacao')">
+                            Ver Suplementos →
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INFO SECTION -->
+            <div style="max-width: 1200px; margin: 40px auto;">
+                <div class="stat-card" style="margin-bottom: 20px;">
+                    <h4 style="color: #333; margin-bottom: 10px;">⏰ Validade do Seu Protocolo</h4>
+                    <p id="validityDisplay" style="color: #666; font-size: 1rem; margin: 0;">Carregando...</p>
+                    <small style="display: block; margin-top: 10px;">Seu protocolo será atualizado após 60 dias de treino</small>
+                </div>
+
+                <div class="stat-card">
+                    <h4 style="color: #333; margin-bottom: 10px;">💬 Precisa de Ajuda?</h4>
+                    <p style="color: #666; margin-bottom: 15px;">Entre em contato via WhatsApp para dúvidas, ajustes ou suporte</p>
+                    <a href="https://wa.me/5538998298303" target="_blank" class="btn-primary" style="display: inline-block; padding: 10px 20px;">
+                        Falar com Clóves
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const codigo_id = sessionStorage.getItem('codigo_id');
+        
+        if (!codigo_id) {
+            window.location.href = '/';
+        }
+
+        // Carregar dados do usuário
+        async function loadUserData() {
+            try {
+                const response = await fetch(`/api/usuario/${codigo_id}`);
+                const data = await response.json();
+
+                if (!data.ok) {
+                    window.location.href = '/onboarding.html';
+                    return;
+                }
+
+                const usuario = data.usuario;
+
+                // Preencher dados
+                document.getElementById('userNameDisplay').textContent = usuario.nome;
+                document.getElementById('objectiveDisplay').textContent = usuario.objetivo;
+                document.getElementById('levelDisplay').textContent = usuario.nivel;
+                document.getElementById('daysDisplay').textContent = usuario.dias_treino + ' dias';
+                
+                document.getElementById('caloriesDisplay').textContent = usuario.calorias_alvo;
+                document.getElementById('proteinDisplay').textContent = usuario.proteina_g;
+                document.getElementById('carbDisplay').textContent = usuario.carbo_g;
+                document.getElementById('fatDisplay').textContent = usuario.gordura_g;
+
+                // Calcular validade (60 dias)
+                const dataInicio = new Date(usuario.criado_em);
+                const dataVencimento = new Date(dataInicio);
+                dataVencimento.setDate(dataVencimento.getDate() + 60);
+                
+                const hoje = new Date();
+                const diasRestantes = Math.ceil((dataVencimento - hoje) / (1000 * 60 * 60 * 24));
+
+                let textoValidade;
+                if (diasRestantes > 0) {
+                    textoValidade = `Válido até ${dataVencimento.toLocaleDateString('pt-BR')} (faltam ${diasRestantes} dias)`;
+                } else {
+                    textoValidade = `Protocolo venceu em ${dataVencimento.toLocaleDateString('pt-BR')}. Compre um novo código para renovar!`;
+                }
+                
+                document.getElementById('validityDisplay').textContent = textoValidade;
+
+                // Salvar em sessão
+                sessionStorage.setItem('usuario', JSON.stringify(usuario));
+
+            } catch (err) {
+                console.error('Erro ao carregar dados:', err);
+                alert('Erro ao carregar dados. Tente novamente.');
+            }
+        }
+
+        function abrirAbreve(tipo) {
+            const titulos = {
+                'treino': ' Seu Treino Personalizado',
+                'dieta': ' Sua Dieta Personalizada',
+                'suplementacao': ' Seu Protocolo de Suplementação'
+            };
+
+            const mensagens = {
+                'treino': 'Em desenvolvimento! Você receberá um programa de treino em 30 fases progressivas de 2 meses cada, com exercícios específicos para seu objetivo e nível.',
+                'dieta': 'Em desenvolvimento! Seu plano alimentar será dividido em refeições com 3 opções diferentes por refeição, além de substituições personalizadas.',
+                'suplementacao': 'Em desenvolvimento! Você receberá um protocolo otimizado com Whey Protein, Ômega 3, Creatina e Multivitamínico.'
+            };
+
+            alert(`${titulos[tipo]}\n\n${mensagens[tipo]}`);
+        }
+
+        function fazerLogout() {
+            sessionStorage.clear();
+            window.location.href = '/';
+        }
+
+        // Carregar ao abrir
+        loadUserData();
+    </script>
+</body>
+</html>

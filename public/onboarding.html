@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Protocolo - SculptX</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="onboarding-container">
+        <div class="onboarding-box">
+            <div class="onboarding-header">
+                <h1>Seu Protocolo Personalizado</h1>
+                <p>Responda algumas perguntas para criar seu plano</p>
+            </div>
+
+            <form id="onboardingForm" class="onboarding-form">
+                <!-- DADOS PESSOAIS -->
+                <div class="form-section">
+                    <h3>Dados Pessoais</h3>
+                    
+                    <div class="form-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" placeholder="Seu nome" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="idade">Idade</label>
+                            <input type="number" id="idade" min="15" max="120" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sexo">Sexo</label>
+                            <select id="sexo" required>
+                                <option value="">Selecione</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="altura">Altura (cm)</label>
+                            <input type="number" id="altura" min="140" max="230" placeholder="Ex: 175" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="peso_atual">Peso Atual (kg)</label>
+                            <input type="number" id="peso_atual" step="0.1" placeholder="Ex: 80.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="peso_alvo">Peso Alvo (kg)</label>
+                            <input type="number" id="peso_alvo" step="0.1" placeholder="Ex: 75" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OBJETIVO E NÍVEL -->
+                <div class="form-section">
+                    <h3>Seu Objetivo</h3>
+                    
+                    <div class="form-group">
+                        <label for="objetivo">O que você quer?</label>
+                        <select id="objetivo" required>
+                            <option value="">Selecione seu objetivo</option>
+                            <option value="Emagrecimento">Emagrecimento - Queimar gordura</option>
+                            <option value="Hipertrofia">Hipertrofia - Ganhar massa muscular</option>
+                            <option value="Definição muscular">Definição - Definir músculos</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nivel">Seu Nível</label>
+                        <select id="nivel" required>
+                            <option value="">Selecione seu nível</option>
+                            <option value="Iniciante">Iniciante - Nunca fiz musculação</option>
+                            <option value="Intermediário">Intermediário - Treino há 1-2 anos</option>
+                            <option value="Avançado">Avançado - Treino há 3+ anos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ROTINA E TREINO -->
+                <div class="form-section">
+                    <h3>Seu Treino</h3>
+                    
+                    <div class="form-group">
+                        <label for="rotina">Seu Nível de Atividade</label>
+                        <select id="rotina" required>
+                            <option value="">Selecione</option>
+                            <option value="Sedentário">Sedentário - Pouco movimento (escritório)</option>
+                            <option value="Leve">Leve - Algum movimento no dia</option>
+                            <option value="Moderado">Moderado - Treino regular</option>
+                            <option value="Intenso">Intenso - Treino pesado</option>
+                            <option value="Muito intenso">Muito intenso - Treino + trabalho físico</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dias_treino">Dias de Treino por Semana</label>
+                            <select id="dias_treino" required>
+                                <option value="">Selecione</option>
+                                <option value="2">2 dias</option>
+                                <option value="3">3 dias</option>
+                                <option value="4">4 dias</option>
+                                <option value="5">5 dias</option>
+                                <option value="6">6 dias</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tempo_treino">Tempo Disponível</label>
+                            <select id="tempo_treino" required>
+                                <option value="">Selecione</option>
+                                <option value="30-45 min">30-45 min</option>
+                                <option value="45-60 min">45-60 min</option>
+                                <option value="60-90 min">60-90 min</option>
+                                <option value="90+ min">90+ min</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIETA -->
+                <div class="form-section">
+                    <h3>Sua Alimentação</h3>
+                    
+                    <div class="form-group">
+                        <label for="refeicoes">Quantas Refeições por Dia?</label>
+                        <select id="refeicoes" required>
+                            <option value="">Selecione</option>
+                            <option value="3">3 refeições</option>
+                            <option value="4">4 refeições</option>
+                            <option value="5">5 refeições</option>
+                            <option value="6">6 refeições</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="window.history.back()">
+                        ← Voltar
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        ✨ Gerar Meu Protocolo
+                    </button>
+                </div>
+
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="loadingMessage" class="loading-message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('onboardingForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+
+        const codigo_id = sessionStorage.getItem('codigo_id');
+        if (!codigo_id) {
+            window.location.href = '/';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const dados = {
+                codigo_id: parseInt(codigo_id),
+                nome: document.getElementById('nome').value.trim(),
+                idade: parseInt(document.getElementById('idade').value),
+                peso_atual: parseFloat(document.getElementById('peso_atual').value),
+                peso_alvo: parseFloat(document.getElementById('peso_alvo').value),
+                altura: parseInt(document.getElementById('altura').value),
+                sexo: document.getElementById('sexo').value,
+                objetivo: document.getElementById('objetivo').value,
+                nivel: document.getElementById('nivel').value,
+                rotina: document.getElementById('rotina').value,
+                dias_treino: parseInt(document.getElementById('dias_treino').value),
+                tempo_treino: document.getElementById('tempo_treino').value,
+                refeicoes: parseInt(document.getElementById('refeicoes').value)
+            };
+
+            errorMessage.style.display = 'none';
+            loadingMessage.style.display = 'block';
+            loadingMessage.textContent = '⏳ Gerando seu protocolo... Um momento!';
+
+            try {
+                const response = await fetch('/api/onboarding', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+
+                const result = await response.json();
+
+                if (!result.ok) {
+                    const erros = result.erros ? result.erros.join('\n') : result.erro;
+                    mostrarErro('❌ ' + erros);
+                    loadingMessage.style.display = 'none';
+                    return;
+                }
+
+                sessionStorage.setItem('usuario_id', result.usuario_id);
+                sessionStorage.setItem('usuario_dados', JSON.stringify(dados));
+
+                loadingMessage.textContent = '✅ Protocolo gerado! Redirecionando...';
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1500);
+
+            } catch (err) {
+                mostrarErro('❌ Erro ao salvar dados. Tente novamente.');
+                loadingMessage.style.display = 'none';
+                console.error(err);
+            }
+        });
+
+        function mostrarErro(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
