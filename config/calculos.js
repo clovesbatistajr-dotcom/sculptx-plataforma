@@ -17,7 +17,7 @@ const GOAL_ADJUSTMENT = {
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// BMR - Basal Metabolic Rate
+// BMR - Basal Metabolic Rate (EXISTENTE)
 // ═══════════════════════════════════════════════════════════════════
 
 function calcBMR(sexo, peso, altura, idade) {
@@ -35,7 +35,7 @@ function calcBMR(sexo, peso, altura, idade) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// TDEE - Total Daily Energy Expenditure
+// TDEE - Total Daily Energy Expenditure (EXISTENTE)
 // ═══════════════════════════════════════════════════════════════════
 
 function calcTDEE(sexo, peso, altura, idade, rotina) {
@@ -49,7 +49,7 @@ function calcTDEE(sexo, peso, altura, idade, rotina) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// CALORIAS ALVO (com ajuste por objetivo)
+// CALORIAS ALVO (EXISTENTE)
 // ═══════════════════════════════════════════════════════════════════
 
 function calcCaloriasAlvo(tdee, objetivo) {
@@ -62,7 +62,7 @@ function calcCaloriasAlvo(tdee, objetivo) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// MACRONUTRIENTES - Proteína, Carboidrato, Gordura
+// MACRONUTRIENTES (EXISTENTE)
 // ═══════════════════════════════════════════════════════════════════
 
 function calcMacros(peso, objetivo, calorias) {
@@ -97,7 +97,7 @@ function calcMacros(peso, objetivo, calorias) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// FUNÇÃO COMPLETA - Calcular Tudo
+// FUNÇÃO COMPLETA - Calcular Protocolo (EXISTENTE)
 // ═══════════════════════════════════════════════════════════════════
 
 function calcularProtocolo(sexo, peso, altura, idade, rotina, objetivo) {
@@ -119,7 +119,7 @@ function calcularProtocolo(sexo, peso, altura, idade, rotina, objetivo) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// VALIDAÇÕES
+// VALIDAÇÕES (EXISTENTE)
 // ═══════════════════════════════════════════════════════════════════
 
 function validarDados(dados) {
@@ -169,7 +169,7 @@ function validarDados(dados) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// GERADOR DE CÓDIGO
+// GERADOR DE CÓDIGO (EXISTENTE)
 // ═══════════════════════════════════════════════════════════════════
 
 function gerarCodigo(tamanho = 8) {
@@ -181,7 +181,146 @@ function gerarCodigo(tamanho = 8) {
   return codigo;
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// ✨ NOVAS FUNÇÕES - DIETA, TREINO, CARDIO
+// ═══════════════════════════════════════════════════════════════════
+
+// 1. DISTRIBUIR CALORIAS POR REFEIÇÃO
+function distribuirCaloriasRefeicoes(calorias_totais, num_refeicoes) {
+  // Percentuais de calorias por refeição conforme quantidade
+  const distribuicao = {
+    3: [0.20, 0.50, 0.30],                    // café, almoço, janta
+    4: [0.15, 0.35, 0.35, 0.15],              // café, almoço, lanche, janta
+    5: [0.15, 0.10, 0.40, 0.20, 0.15],        // café, lanche1, almoço, lanche2, janta
+    6: [0.12, 0.08, 0.38, 0.12, 0.20, 0.10]   // café, lanche1, almoço, lanche2, café tarde, janta
+  };
+
+  const percentuais = distribuicao[num_refeicoes] || distribuicao[3];
+  const calorias_refeicoes = percentuais.map(p => Math.round(calorias_totais * p));
+
+  return calorias_refeicoes;
+}
+
+// 2. DISTRIBUIR MACROS POR REFEIÇÃO
+function distribuirMacrosRefeicoes(macros_totais, num_refeicoes) {
+  // Distribui os macros de forma aproximada igual nas refeições
+  const proteina_por_refeicao = Math.round(macros_totais.proteina / num_refeicoes);
+  const carbo_por_refeicao = Math.round(macros_totais.carbo / num_refeicoes);
+  const gordura_por_refeicao = Math.round(macros_totais.gordura / num_refeicoes);
+
+  const macros_refeicoes = [];
+  for (let i = 0; i < num_refeicoes; i++) {
+    macros_refeicoes.push({
+      proteina: proteina_por_refeicao,
+      carbo: carbo_por_refeicao,
+      gordura: gordura_por_refeicao
+    });
+  }
+
+  return macros_refeicoes;
+}
+
+// 3. NOMES DAS REFEIÇÕES
+function getNomesRefeicoes(num_refeicoes) {
+  const nomes = {
+    3: ['Café da Manhã', 'Almoço', 'Janta'],
+    4: ['Café da Manhã', 'Almoço', 'Lanche', 'Janta'],
+    5: ['Café da Manhã', 'Lanche Manhã', 'Almoço', 'Lanche Tarde', 'Janta'],
+    6: ['Café da Manhã', 'Lanche Manhã', 'Almoço', 'Lanche Tarde', 'Café da Tarde', 'Janta']
+  };
+
+  return nomes[num_refeicoes] || nomes[3];
+}
+
+// 4. CALCULAR PRÓXIMA FASE
+function calcularProximaFase(fase_atual, nivel_aluno) {
+  const fase_proxima = fase_atual + 1;
+  
+  let novo_nivel = nivel_aluno;
+  if (fase_atual === 3) novo_nivel = 'Intermediário';
+  if (fase_atual === 6) novo_nivel = 'Avançado';
+  
+  return { fase_proxima, novo_nivel };
+}
+
+// 5. GERAR ESTRUTURA DE DIETA (sem dados ainda, só estrutura)
+function gerarEstruturaDieta(usuario_id, calorias_alvo, num_refeicoes, macros_totais) {
+  const calorias_refeicoes = distribuirCaloriasRefeicoes(calorias_alvo, num_refeicoes);
+  const macros_refeicoes = distribuirMacrosRefeicoes(macros_totais, num_refeicoes);
+  const nomes_refeicoes = getNomesRefeicoes(num_refeicoes);
+
+  const dieta = {
+    usuario_id,
+    refeicoes: [],
+    gerada_em: new Date(),
+    calorias_total: calorias_alvo,
+    macros_total: macros_totais
+  };
+
+  for (let i = 0; i < num_refeicoes; i++) {
+    dieta.refeicoes.push({
+      numero: i + 1,
+      nome: nomes_refeicoes[i],
+      calorias_alvo: calorias_refeicoes[i],
+      macros: macros_refeicoes[i],
+      opcoes: [] // Será preenchida com dados do banco
+    });
+  }
+
+  return dieta;
+}
+
+// 6. GERAR ESTRUTURA DE TREINO (sem dados ainda, só estrutura)
+function gerarEstruturaTreino(usuario_id, dias_treino, tempo_minuto, local, nivel, objetivo) {
+  const tempo_por_dia = Math.round(tempo_minuto / dias_treino);
+
+  const treino = {
+    usuario_id,
+    dias: [],
+    gerada_em: new Date(),
+    dias_total: dias_treino,
+    tempo_total_minutos: tempo_minuto,
+    tempo_por_dia: tempo_por_dia,
+    local,
+    nivel,
+    objetivo
+  };
+
+  for (let dia = 1; dia <= dias_treino; dia++) {
+    treino.dias.push({
+      numero: dia,
+      tempo_disponivel_minutos: tempo_por_dia,
+      exercicios: [] // Será preenchida com dados do banco
+    });
+  }
+
+  return treino;
+}
+
+// 7. GERAR ESTRUTURA DE CARDIO
+function gerarEstruturacardio(usuario_id, local, objetivo, dias_treino) {
+  const intensidade_map = {
+    'Emagrecimento': 'Moderada a Alta',
+    'Hipertrofia': 'Leve a Moderada',
+    'Definição muscular': 'Moderada'
+  };
+
+  return {
+    usuario_id,
+    local,
+    objetivo,
+    intensidade: intensidade_map[objetivo] || 'Moderada',
+    dias_cardio: [], // Será preenchida com dados do banco
+    dias_semana: dias_treino
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// EXPORTAR TUDO
+// ═══════════════════════════════════════════════════════════════════
+
 module.exports = {
+  // Existentes
   calcBMR,
   calcTDEE,
   calcCaloriasAlvo,
@@ -190,5 +329,14 @@ module.exports = {
   validarDados,
   gerarCodigo,
   ACTIVITY_MULTIPLIER,
-  GOAL_ADJUSTMENT
+  GOAL_ADJUSTMENT,
+  
+  // Novas
+  distribuirCaloriasRefeicoes,
+  distribuirMacrosRefeicoes,
+  getNomesRefeicoes,
+  calcularProximaFase,
+  gerarEstruturaDieta,
+  gerarEstruturaTreino,
+  gerarEstruturacardio
 };

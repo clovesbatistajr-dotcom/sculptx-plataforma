@@ -39,7 +39,6 @@ app.use((req, res, next) => {
 
 initDatabase().catch(err => {
   console.error('Erro ao inicializar banco:', err);
-  process.exit(1);
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -103,7 +102,7 @@ app.post('/api/onboarding', async (req, res) => {
   try {
     const {
       codigo_id, nome, idade, peso_atual, peso_alvo, altura,
-      sexo, objetivo, nivel, rotina, dias_treino, tempo_treino, refeicoes
+      sexo, objetivo, nivel, rotina, dias_treino, tempo_treino, refeicoes, local_treino
     } = req.body;
 
     // Validar dados
@@ -164,8 +163,8 @@ app.post('/api/onboarding', async (req, res) => {
       // Inicializar progresso
       await pool.query(
         `INSERT INTO progresso (usuario_id, tipo, categoria, nivel, fase_atual, proximo_desbloqueio)
-         VALUES ($1, 'treino', $2, $3, 1, NOW() + INTERVAL '60 days'),
-                ($1, 'dieta', $2, $3, 1, NOW() + INTERVAL '60 days')`,
+         VALUES ($1, 'treino', $2, $3, 1, NOW() + INTERVAL '30 days'),
+                ($1, 'dieta', $2, $3, 1, NOW() + INTERVAL '30 days')`,
         [usuario_id, objetivo, nivel]
       );
     }
@@ -212,6 +211,174 @@ app.get('/api/usuario/:codigo_id', async (req, res) => {
   } catch (err) {
     console.error('Erro em /api/usuario:', err.message);
     res.status(500).json({ ok: false, erro: 'Erro ao buscar dados' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// APIS NOVAS - GERAR DIETA, TREINO, CARDIO
+// ═══════════════════════════════════════════════════════════════════
+
+// 1. Gerar dieta personalizada
+app.post('/api/gerar-dieta', async (req, res) => {
+  try {
+    const { usuario_id, calorias_alvo, num_refeicoes, macros } = req.body;
+
+    if (!usuario_id || !calorias_alvo || !num_refeicoes) {
+      return res.status(400).json({ ok: false, erro: 'Dados incompletos' });
+    }
+
+    // Gerar estrutura da dieta
+    const dieta = calculos.gerarEstruturaDieta(usuario_id, calorias_alvo, num_refeicoes, macros);
+
+    // Buscar alimentos do banco
+    const alimentosResult = await pool.query(
+      'SELECT * FROM alimentos ORDER BY categoria, nome LIMIT 50'
+    );
+
+    // Para cada refeição, selecionar alimentos (SIMPLIFICADO)
+    const alimentos = alimentosResult.rows;
+    
+    for (let i = 0; i < dieta.refeicoes.length; i++) {
+      const refeicao = dieta.refeicoes[i];
+      
+      // Seleciona até 3 alimentos aleatórios como opções
+      const opcoes = [];
+      for (let j = 0; j < 3 && j < alimentos.length; j++) {
+        const alimento = alimentos[Math.floor(Math.random() * alimentos.length)];
+        opcoes.push({
+          nome: alimento.nome,
+          porcao: alimento.porcao,
+          calorias: alimento.calorias,
+          proteina: alimento.proteina_g,
+          carbo: alimento.carbo_g,
+          gordura: alimento.gordura_g
+        });
+      }
+      
+      refeicao.opcoes = opcoes;
+    }
+
+    res.json({
+      ok: true,
+      dieta
+    });
+
+  } catch (err) {
+    console.error('Erro ao gerar dieta:', err.message);
+    res.status(500).json({ ok: false, erro: 'Erro ao gerar dieta' });
+  }
+});
+
+// 2. Gerar treino personalizado
+app.post('/api/gerar-treino', async (req, res) => {
+  try {
+    const { usuario_id, dias_treino, tempo_minuto, local, nivel, objetivo } = req.body;
+
+    if (!usuario_id || !dias_treino || !tempo_minuto) {
+      return res.status(400).json({ ok: false, erro: 'Dados incompletos' });
+    }
+
+    // Gerar estrutura do treino
+    const treino = calculos.gerarEstruturaTreino(usuario_id, dias_treino, tempo_minuto, local, nivel, objetivo);
+
+    // Buscar exercícios conforme local e nível
+    const localMap = {
+      'academia': 'Academia',
+      'casa': 'Casa'
+    };
+
+    const exerciciosResult = await pool.query(
+      `SELECT * FROM exercicios 
+       WHERE (local = $1 OR local = 'Academia' OR local = 'Casa')
+       AND nivel = $2
+       ORDER BY tempo_minutos ASC
+       LIMIT 80`,
+      [localMap[local] || local, nivel]
+    );
+
+    const exercicios = exerciciosResult.rows;
+
+    // Montar treino dia por dia
+    for (let dia = 0; dia < treino.dias.length; dia++) {
+      const dia_treino = treino.dias[dia];
+      const tempo_disponivel = dia_treino.tempo_disponivel_minutos;
+      
+      let tempo_acumulado = 0;
+      const exercicios_dia = [];
+
+      // Seleciona exercícios que cabem no tempo disponível
+      for (let i = 0; i < exercicios.length && tempo_acumulado < tempo_disponivel; i++) {
+        const ex = exercicios[i];
+        
+        if (tempo_acumulado + ex.tempo_minutos <= tempo_disponivel) {
+          exercicios_dia.push({
+            nome: ex.nome,
+            series: ex.series,
+            repeticoes: ex.repeticoes,
+            descanso_segundos: ex.descanso_segundos,
+            tempo_minutos: ex.tempo_minutos,
+            tipo: ex.tipo,
+            link: ex.link_video
+          });
+          
+          tempo_acumulado += ex.tempo_minutos;
+        }
+      }
+      
+      dia_treino.exercicios = exercicios_dia;
+      dia_treino.tempo_total_usado = tempo_acumulado;
+    }
+
+    res.json({
+      ok: true,
+      treino
+    });
+
+  } catch (err) {
+    console.error('Erro ao gerar treino:', err.message);
+    res.status(500).json({ ok: false, erro: 'Erro ao gerar treino' });
+  }
+});
+
+// 3. Gerar cardio
+app.post('/api/gerar-cardio', async (req, res) => {
+  try {
+    const { usuario_id, local, objetivo, dias_treino } = req.body;
+
+    if (!usuario_id || !local) {
+      return res.status(400).json({ ok: false, erro: 'Dados incompletos' });
+    }
+
+    // Gerar estrutura do cardio
+    const cardio = calculos.gerarEstruturacardio(usuario_id, local, objetivo, dias_treino);
+
+    // Buscar cardio conforme local
+    const localMap = {
+      'academia': 'Academia',
+      'casa': 'Casa'
+    };
+
+    const cardioResult = await pool.query(
+      'SELECT * FROM cardio WHERE local = $1 LIMIT 10',
+      [localMap[local] || local]
+    );
+
+    // Seleciona até 3 tipos de cardio
+    const cardios = cardioResult.rows.slice(0, 3);
+    cardio.dias_cardio = cardios.map(c => ({
+      tipo: c.tipo,
+      duracao_minutos: c.duracao_minutos,
+      intensidade: c.intensidade
+    }));
+
+    res.json({
+      ok: true,
+      cardio
+    });
+
+  } catch (err) {
+    console.error('Erro ao gerar cardio:', err.message);
+    res.status(500).json({ ok: false, erro: 'Erro ao gerar cardio' });
   }
 });
 
@@ -397,7 +564,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 SculptX Plataforma iniciado!`);
+  console.log(`\n🚀 SculptX Plataforma v2.1 iniciado!`);
   console.log(`📍 URL: http://localhost:${PORT}`);
   console.log(`🔐 Admin: http://localhost:${PORT}/admin`);
   console.log(`\n⚙️ Ambiente: ${process.env.NODE_ENV || 'development'}\n`);
