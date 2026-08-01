@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
 const path = require('path');
 require('dotenv').config();
 
@@ -10,10 +9,9 @@ const calculos = require('./config/calculos');
 const app = express();
 
 // ═══════════════════════════════════════════════════════════════════
-// MIDDLEWARE
+// MIDDLEWARE (SEM HELMET)
 // ═══════════════════════════════════════════════════════════════════
 
-app.use(helmet());
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -34,7 +32,7 @@ app.get('/health', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// ⭐ ADMIN AUTH - SUPER SIMPLES
+// ⭐ ADMIN AUTH
 // ═══════════════════════════════════════════════════════════════════
 
 const ADMIN_PASSWORD = '01010924Clo#';
@@ -43,14 +41,9 @@ app.get('/api/admin/dashboard', (req, res) => {
   try {
     const senha = req.headers['x-admin-password'];
     
-    console.log('[ADMIN] Tentando login com senha:', senha ? '***' : 'vazia');
-    
     if (senha !== ADMIN_PASSWORD) {
-      console.log('[ADMIN] Senha INCORRETA');
       return res.status(401).json({ ok: false, message: 'Senha inválida' });
     }
-    
-    console.log('[ADMIN] Senha CORRETA - Carregando dashboard');
     
     res.json({
       ok: true,
@@ -61,7 +54,6 @@ app.get('/api/admin/dashboard', (req, res) => {
       }
     });
   } catch (err) {
-    console.error('[ADMIN] Erro:', err.message);
     res.status(500).json({ ok: false, message: err.message });
   }
 });
