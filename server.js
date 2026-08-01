@@ -383,45 +383,60 @@ app.post('/api/gerar-cardio', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// APIS ADMIN - PROTEGIDAS
+// MIDDLEWARE PARA VALIDAR SENHA ADMIN
 // ═══════════════════════════════════════════════════════════════════
 
-// 1. Gerar novo código
-app.post('/api/admin/gerar-codigo', verificarAutenticacao, async (req, res) => {
+const ADMIN_PASSWORD = '01010924Clo#';
+
+function validarSenhaAdmin(req, res, next) {
+  const senha = req.headers['x-admin-password'] || req.body.password;
+  
+  if (senha !== ADMIN_PASSWORD) {
+    return res.status(401).json({ 
+      ok: false, 
+      message: 'Senha de admin inválida' 
+    });
+  }
+  
+  next();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// APIS ADMIN - PROTEGIDAS COM SENHA
+// ═══════════════════════════════════════════════════════════════════
+
+// 1. Dashboard admin (estatísticas) - CORRIGIDO
+app.get('/api/admin/dashboard', validarSenhaAdmin, async (req, res) => {
   try {
-    const { duracao_dias = 60, notas = '' } = req.body;
-
-    const codigo = calculos.gerarCodigo(8);
-    const vencimento = new Date();
-    vencimento.setDate(vencimento.getDate() + duracao_dias);
-
-    await pool.query(
-      `INSERT INTO codigos (codigo, ativo, duracao_dias, vencimento, notas)
-       VALUES ($1, true, $2, $3, $4)`,
-      [codigo, duracao_dias, vencimento, notas]
+    const codigos = await pool.query('SELECT COUNT(*) FROM codigos WHERE ativo = true');
+    const usuarios = await pool.query('SELECT COUNT(*) FROM usuarios');
+    const codigosMes = await pool.query(
+      "SELECT COUNT(*) FROM codigos WHERE created_at >= NOW() - INTERVAL '30 days'"
     );
 
     res.json({
       ok: true,
-      codigo,
-      vencimento,
-      duracao_dias
+      stats: {
+        codigos_ativos: parseInt(codigos.rows[0].count),
+        usuarios_total: parseInt(usuarios.rows[0].count),
+        codigos_ultimo_mes: parseInt(codigosMes.rows[0].count)
+      }
     });
 
   } catch (err) {
-    console.error('Erro ao gerar código:', err.message);
-    res.status(500).json({ ok: false, erro: 'Erro ao gerar código' });
+    console.error('Erro no dashboard admin:', err.message);
+    res.status(500).json({ ok: false, erro: 'Erro ao carregar dashboard' });
   }
 });
 
-// 2. Listar códigos
-app.get('/api/admin/codigos', verificarAutenticacao, async (req, res) => {
+// 2. Listar códigos - CORRIGIDO
+app.get('/api/admin/codigos', validarSenhaAdmin, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, codigo, ativo, duracao_dias, vencimento, criado_em, notas,
+      `SELECT id, codigo, ativo, duracao_dias, vencimento, created_at, notas,
               (SELECT COUNT(*) FROM usuarios WHERE codigo_id = codigos.id) as usuarios
        FROM codigos
-       ORDER BY criado_em DESC
+       ORDER BY created_at DESC
        LIMIT 100`
     );
 
@@ -436,8 +451,37 @@ app.get('/api/admin/codigos', verificarAutenticacao, async (req, res) => {
   }
 });
 
-// 3. Desativar código
-app.post('/api/admin/desativar-codigo/:id', verificarAutenticacao, async (req, res) => {
+// 3. Gerar novo código - CORRIGIDO
+app.post('/api/admin/gerar-codigo', validarSenhaAdmin, async (req, res) => {
+  try {
+    const { duracao_dias = 60, notas = '' } = req.body;
+
+    const codigo = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const vencimento = new Date();
+    vencimento.setDate(vencimento.getDate() + duracao_dias);
+
+    const result = await pool.query(
+      `INSERT INTO codigos (codigo, ativo, duracao_dias, vencimento, notas)
+       VALUES ($1, true, $2, $3, $4)
+       RETURNING id, codigo`,
+      [codigo, duracao_dias, vencimento, notas]
+    );
+
+    res.json({
+      ok: true,
+      codigo: result.rows[0].codigo,
+      vencimento,
+      duracao_dias
+    });
+
+  } catch (err) {
+    console.error('Erro ao gerar código:', err.message);
+    res.status(500).json({ ok: false, erro: 'Erro ao gerar código' });
+  }
+});
+
+// 4. Desativar código - CORRIGIDO
+app.post('/api/admin/desativar-codigo/:id', validarSenhaAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -454,14 +498,14 @@ app.post('/api/admin/desativar-codigo/:id', verificarAutenticacao, async (req, r
   }
 });
 
-// 4. Listar usuários
-app.get('/api/admin/usuarios', verificarAutenticacao, async (req, res) => {
+// 5. Listar usuários - CORRIGIDO
+app.get('/api/admin/usuarios', validarSenhaAdmin, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT u.id, u.nome, u.idade, u.objetivo, u.nivel, u.criado_em, c.codigo
+      `SELECT u.id, u.nome, u.idade, u.objetivo, u.nivel, u.created_at as criado_em, c.codigo
        FROM usuarios u
        LEFT JOIN codigos c ON u.codigo_id = c.id
-       ORDER BY u.criado_em DESC
+       ORDER BY u.created_at DESC
        LIMIT 200`
     );
 
@@ -477,8 +521,8 @@ app.get('/api/admin/usuarios', verificarAutenticacao, async (req, res) => {
   }
 });
 
-// 5. Ver detalhes de um usuário
-app.get('/api/admin/usuario/:id', verificarAutenticacao, async (req, res) => {
+// 6. Ver detalhes de um usuário - CORRIGIDO
+app.get('/api/admin/usuario/:id', validarSenhaAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -499,30 +543,6 @@ app.get('/api/admin/usuario/:id', verificarAutenticacao, async (req, res) => {
   } catch (err) {
     console.error('Erro ao buscar usuário:', err.message);
     res.status(500).json({ ok: false, erro: 'Erro ao buscar usuário' });
-  }
-});
-
-// 6. Dashboard admin (estatísticas)
-app.get('/api/admin/dashboard', verificarAutenticacao, async (req, res) => {
-  try {
-    const codigos = await pool.query('SELECT COUNT(*) FROM codigos WHERE ativo = true');
-    const usuarios = await pool.query('SELECT COUNT(*) FROM usuarios');
-    const codigosMes = await pool.query(
-      "SELECT COUNT(*) FROM codigos WHERE criado_em >= NOW() - INTERVAL '30 days'"
-    );
-
-    res.json({
-      ok: true,
-      stats: {
-        codigos_ativos: parseInt(codigos.rows[0].count),
-        usuarios_total: parseInt(usuarios.rows[0].count),
-        codigos_ultimo_mes: parseInt(codigosMes.rows[0].count)
-      }
-    });
-
-  } catch (err) {
-    console.error('Erro no dashboard admin:', err.message);
-    res.status(500).json({ ok: false, erro: 'Erro ao carregar dashboard' });
   }
 });
 
@@ -551,7 +571,7 @@ app.use((req, res) => {
 // ═══════════════════════════════════════════════════════════════════
 
 app.use((err, req, res, next) => {
-  console.error('❌ Erro não capturado:', err);
+  console.error('Erro não capturado:', err);
   res.status(500).json({
     ok: false,
     erro: process.env.NODE_ENV === 'production' ? 'Erro no servidor' : err.message
