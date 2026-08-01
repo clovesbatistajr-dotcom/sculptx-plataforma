@@ -72,14 +72,44 @@ app.get('/api/admin/codigos', (req, res) => {
   });
 });
 
-app.post('/api/admin/gerar-codigo', (req, res) => {
-  const senha = req.headers['x-admin-password'];
-  if (senha !== ADMIN_PASSWORD) {
-    return res.status(401).json({ ok: false, message: 'Senha inválida' });
+// ⭐ FUNÇÃO CORRIGIDA - GERA CÓDIGO E SALVA NO BANCO
+app.post('/api/admin/gerar-codigo', async (req, res) => {
+  try {
+    const senha = req.headers['x-admin-password'];
+    if (senha !== ADMIN_PASSWORD) {
+      return res.status(401).json({ ok: false, message: 'Senha inválida' });
+    }
+    
+    const { duracao_dias = 60, notas = '' } = req.body;
+
+    const codigo = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const vencimento = new Date();
+    vencimento.setDate(vencimento.getDate() + duracao_dias);
+
+    // SALVAR NO BANCO - CORRIGIDO
+    const result = await pool.query(
+      `INSERT INTO codigos (codigo, ativo, duracao_dias, vencimento, notas, created_at)
+       VALUES ($1, true, $2, $3, $4, NOW())
+       RETURNING id, codigo, vencimento`,
+      [codigo, duracao_dias, vencimento, notas]
+    );
+
+    console.log('[ADMIN] Código gerado e SALVO no banco:', codigo);
+
+    res.json({
+      ok: true,
+      codigo: result.rows[0].codigo,
+      vencimento: result.rows[0].vencimento,
+      duracao_dias
+    });
+
+  } catch (err) {
+    console.error('[ADMIN] Erro ao gerar código:', err.message);
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Erro ao gerar código: ' + err.message 
+    });
   }
-  
-  const codigo = Math.random().toString(36).substring(2, 10).toUpperCase();
-  res.json({ ok: true, codigo });
 });
 
 app.get('/api/admin/usuarios', (req, res) => {
