@@ -285,7 +285,7 @@ async function initDatabase() {
     // Admin padrão
     console.log('📝 Inserindo admin padrão...');
     await client.query(
-      `INSERT INTO admin (username, password) 
+      `INSERT INTO admin (username, password_hash) 
        VALUES ('admin', '01010924Clo#') 
        ON CONFLICT DO NOTHING`
     );
