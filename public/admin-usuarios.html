@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários | SculptX Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1f2e;
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #2d3748;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #a0aec0;
+        }
+
+        .botao-voltar {
+            margin-bottom: 20px;
+            padding: 12px 24px;
+            background: transparent;
+            color: #2d9d78;
+            border: 2px solid #2d9d78;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .botao-voltar:hover {
+            background: #2d9d78;
+            color: white;
+        }
+
+        .tabela-container {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            border-bottom: 2px solid #4a5568;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            color: #2d9d78;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #4a5568;
+            color: #a0aec0;
+        }
+
+        tbody tr:hover {
+            background: #374151;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2d9d78 0%, #1e7e5f 100%);
+            color: white;
+        }
+
+        .botao-detalhes {
+            padding: 8px 16px;
+            background: #2d9d78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .botao-detalhes:hover {
+            background: #1e7e5f;
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.ativo {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2d3748;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a5568;
+        }
+
+        .modal-header h2 {
+            color: #fff;
+            font-size: 24px;
+        }
+
+        .modal-fechar {
+            background: none;
+            border: none;
+            color: #a0aec0;
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-fechar:hover {
+            color: #fff;
+        }
+
+        .detalhes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detalhe-box {
+            background: #374151;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #2d9d78;
+        }
+
+        .detalhe-label {
+            font-size: 12px;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .detalhe-valor {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .macros-container {
+            background: #374151;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .macros-titulo {
+            color: #2d9d78;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .macros-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .macro-item {
+            background: #2d3748;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 3px solid #2d9d78;
+        }
+
+        .macro-label {
+            font-size: 11px;
+            color: #a0aec0;
+            text-transform: uppercase;
+        }
+
+        .macro-valor {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            margin-top: 8px;
+        }
+
+        .vazio {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        @media (max-width: 768px) {
+            .tabela-container {
+                overflow-x: scroll;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .detalhes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .macros-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="botao-voltar" onclick="voltarAdmin()">← Voltar ao Admin</button>
+
+        <div class="header">
+            <h1>👥 Gerenciar Usuários</h1>
+            <p>Lista de todos os alunos cadastrados na plataforma</p>
+        </div>
+
+        <div class="tabela-container">
+            <table id="tabelaUsuarios">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Objetivo</th>
+                        <th>Nível</th>
+                        <th>Código</th>
+                        <th>Data de Cadastro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela">
+                    <tr>
+                        <td colspan="6" class="vazio">Carregando usuários...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div class="modal" id="modalDetalhes">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Detalhes do Usuário</h2>
+                <button class="modal-fechar" onclick="fecharModal()">✕</button>
+            </div>
+
+            <div class="detalhes-grid" id="detalhesConteudo">
+                <!-- Conteúdo inserido por JS -->
+            </div>
+
+            <div class="macros-container">
+                <div class="macros-titulo">Macronutrientes Diários</div>
+                <div class="macros-grid" id="macrosConteudo">
+                    <!-- Conteúdo inserido por JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function carregarUsuarios() {
+            try {
+                // Como admin, fazer requisição pra pegar usuários
+                const senha = prompt('Digite a senha do admin:');
+                
+                if (!senha) return;
+
+                // Aqui você precisaria de um endpoint que list os usuários
+                // Por enquanto, mostraremos uma mensagem
+                
+                document.getElementById('corpoTabela').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="vazio">
+                            <p>Funcionalidade em desenvolvimento</p>
+                            <p style="font-size: 12px; margin-top: 10px;">Os usuários serão exibidos aqui após validação de senha</p>
+                        </td>
+                    </tr>
+                `;
+
+            } catch (err) {
+                console.error('Erro ao carregar usuários:', err);
+                document.getElementById('corpoTabela').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="vazio">Erro ao carregar usuários</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function abrirDetalhes(usuarioId, nome, objetivo, nivel, codigo, data) {
+            document.getElementById('modalTitulo').textContent = `Detalhes de ${nome}`;
+            
+            document.getElementById('detalhesConteudo').innerHTML = `
+                <div class="detalhe-box">
+                    <div class="detalhe-label">Nome</div>
+                    <div class="detalhe-valor">${nome}</div>
+                </div>
+                <div class="detalhe-box">
+                    <div class="detalhe-label">Objetivo</div>
+                    <div class="detalhe-valor">${objetivo}</div>
+                </div>
+                <div class="detalhe-box">
+                    <div class="detalhe-label">Nível</div>
+                    <div class="detalhe-valor">${nivel}</div>
+                </div>
+                <div class="detalhe-box">
+                    <div class="detalhe-label">Código de Acesso</div>
+                    <div class="detalhe-valor">${codigo}</div>
+                </div>
+                <div class="detalhe-box">
+                    <div class="detalhe-label">Data de Cadastro</div>
+                    <div class="detalhe-valor">${data}</div>
+                </div>
+                <div class="detalhe-box">
+                    <div class="detalhe-label">ID do Usuário</div>
+                    <div class="detalhe-valor">#${usuarioId}</div>
+                </div>
+            `;
+
+            document.getElementById('macrosConteudo').innerHTML = `
+                <div class="macro-item">
+                    <div class="macro-label">Calorias</div>
+                    <div class="macro-valor">2500</div>
+                </div>
+                <div class="macro-item">
+                    <div class="macro-label">Proteína</div>
+                    <div class="macro-valor">150g</div>
+                </div>
+                <div class="macro-item">
+                    <div class="macro-label">Carboidrato</div>
+                    <div class="macro-valor">300g</div>
+                </div>
+                <div class="macro-item">
+                    <div class="macro-label">Gordura</div>
+                    <div class="macro-valor">80g</div>
+                </div>
+            `;
+
+            document.getElementById('modalDetalhes').classList.add('ativo');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalDetalhes').classList.remove('ativo');
+        }
+
+        function voltarAdmin() {
+            window.location.href = 'admin.html';
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modalDetalhes').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModal();
+            }
+        });
+
+        // Carregar usuários ao abrir
+        carregarUsuarios();
+    </script>
+</body>
+</html>
