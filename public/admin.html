@@ -97,6 +97,11 @@
             font-weight: 600;
         }
 
+        .login-prompt button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
         .admin-section {
             display: none;
         }
@@ -221,6 +226,33 @@
             font-family: inherit;
         }
 
+        .error-message {
+            color: #d32f2f;
+            padding: 12px;
+            background: rgba(211, 47, 47, 0.1);
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .success-message {
+            color: #2d7a4f;
+            padding: 12px;
+            background: rgba(45, 122, 79, 0.1);
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .debug-info {
+            background: #f5f7fa;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            border-left: 3px solid #2d7a4f;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .admin-container {
                 grid-template-columns: 1fr;
@@ -274,9 +306,11 @@
                     <p style="color: #666; margin-bottom: 20px;">Digite sua senha para acessar o painel</p>
                     <div class="login-prompt">
                         <input type="password" id="adminPassword" placeholder="Senha admin" autocomplete="off">
-                        <button onclick="fazerLogin()">Entrar</button>
+                        <button id="btnEntrar" onclick="fazerLogin()">Entrar</button>
                     </div>
-                    <div id="loginError" class="error-message" style="display: none; margin-top: 15px;"></div>
+                    <div id="loginError" class="error-message" style="display: none;"></div>
+                    <div id="debugInfo" class="debug-info"></div>
+                    <p style="color: #999; font-size: 0.85rem; margin-top: 20px;">Senha padrão: <code>01010924Clo#</code></p>
                 </div>
             </div>
 
@@ -284,6 +318,7 @@
             <div id="dashboardSection" class="admin-section">
                 <div class="admin-header">
                     <h2>Dashboard</h2>
+                    <button class="btn-small" onclick="fazerLogout()" style="background: #999;">Sair</button>
                 </div>
 
                 <div class="admin-stats" id="statsContainer">
@@ -385,44 +420,99 @@
         let adminPassword = '';
 
         // ═══════════════════════════════════════════════════════════════════
-        // LOGIN
+        // LOGIN COM DEBUG
         // ═══════════════════════════════════════════════════════════════════
 
-        function fazerLogin() {
+        async function fazerLogin() {
             const senha = document.getElementById('adminPassword').value;
+            const btnEntrar = document.getElementById('btnEntrar');
+            const debugDiv = document.getElementById('debugInfo');
             
             if (!senha) {
                 mostrarErroLogin('Digite sua senha');
                 return;
             }
 
-            // Fazer requisição com autenticação
+            btnEntrar.disabled = true;
+            btnEntrar.textContent = 'Autenticando...';
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML = '<strong>🔍 Tentando autenticar...</strong><br>';
+
             adminPassword = senha;
 
-            // Testar conexão
-            fetch('/api/admin/dashboard', {
-                headers: { 'x-admin-password': senha }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
+            try {
+                // Tentar a rota /api/admin/dashboard
+                debugDiv.innerHTML += '1️⃣ Tentando GET /api/admin/dashboard<br>';
+                
+                const res = await fetch('/api/admin/dashboard', {
+                    headers: { 'x-admin-password': senha }
+                });
+
+                debugDiv.innerHTML += `   Status: ${res.status}<br>`;
+                debugDiv.innerHTML += `   Content-Type: ${res.headers.get('content-type')}<br>`;
+
+                // Tentar ler como JSON
+                let data;
+                try {
+                    data = await res.json();
+                    debugDiv.innerHTML += `   Response: ${JSON.stringify(data)}<br>`;
+                } catch (e) {
+                    debugDiv.innerHTML += `   ❌ Não é JSON válido<br>`;
+                    throw new Error(`Status ${res.status}: Resposta inválida`);
+                }
+
+                // Verificar se autenticou
+                if (data.ok || res.status === 200) {
+                    debugDiv.innerHTML += '<br>✅ <strong>Autenticação bem-sucedida!</strong><br>';
                     autenticado = true;
                     document.getElementById('loginSection').style.display = 'none';
                     carregarDashboard();
                     abrirSecao('dashboard');
                 } else {
-                    mostrarErroLogin('Senha inválida');
+                    throw new Error(data.message || 'Senha inválida');
                 }
-            })
-            .catch(err => {
-                mostrarErroLogin('Erro ao conectar');
-                console.error(err);
-            });
+
+            } catch (err) {
+                debugDiv.innerHTML += `<br>❌ <strong>Erro:</strong> ${err.message}<br>`;
+                
+                // Tentar rota alternativa
+                debugDiv.innerHTML += '<br>2️⃣ Tentando POST /api/admin/login (rota alternativa)<br>';
+                
+                try {
+                    const res2 = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: senha })
+                    });
+
+                    debugDiv.innerHTML += `   Status: ${res2.status}<br>`;
+                    
+                    let data2 = await res2.json();
+                    debugDiv.innerHTML += `   Response: ${JSON.stringify(data2)}<br>`;
+
+                    if (data2.ok || res2.status === 200) {
+                        debugDiv.innerHTML += '<br>✅ <strong>Autenticação bem-sucedida!</strong><br>';
+                        autenticado = true;
+                        document.getElementById('loginSection').style.display = 'none';
+                        carregarDashboard();
+                        abrirSecao('dashboard');
+                    } else {
+                        throw new Error(data2.message || 'Senha inválida');
+                    }
+                } catch (err2) {
+                    debugDiv.innerHTML += `   ❌ Erro: ${err2.message}<br>`;
+                    mostrarErroLogin('Falha na autenticação. Abra Console (F12) para mais detalhes.');
+                    console.error('Erro de login:', err, err2);
+                }
+            } finally {
+                btnEntrar.disabled = false;
+                btnEntrar.textContent = 'Entrar';
+            }
         }
 
         function mostrarErroLogin(msg) {
             const errorDiv = document.getElementById('loginError');
-            errorDiv.textContent = '' + msg;
+            errorDiv.textContent = '❌ ' + msg;
             errorDiv.style.display = 'block';
         }
 
