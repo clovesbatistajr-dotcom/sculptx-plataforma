@@ -9,7 +9,7 @@ const calculos = require('./config/calculos');
 const app = express();
 
 // ═══════════════════════════════════════════════════════════════════
-// MIDDLEWARE (SEM HELMET)
+// MIDDLEWARE
 // ═══════════════════════════════════════════════════════════════════
 
 app.use(cors({ origin: '*', credentials: true }));
@@ -32,7 +32,7 @@ app.get('/health', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// ⭐ ADMIN AUTH
+// ADMIN AUTH
 // ═══════════════════════════════════════════════════════════════════
 
 const ADMIN_PASSWORD = '01010924Clo#';
@@ -72,7 +72,7 @@ app.get('/api/admin/codigos', (req, res) => {
   });
 });
 
-// ⭐ FUNÇÃO CORRIGIDA - GERA CÓDIGO E SALVA NO BANCO
+// ⭐ GERAR CÓDIGO - CORRIGIDO (SEM created_at que pode não existir)
 app.post('/api/admin/gerar-codigo', async (req, res) => {
   try {
     const senha = req.headers['x-admin-password'];
@@ -86,28 +86,35 @@ app.post('/api/admin/gerar-codigo', async (req, res) => {
     const vencimento = new Date();
     vencimento.setDate(vencimento.getDate() + duracao_dias);
 
-    // SALVAR NO BANCO - CORRIGIDO
+    console.log('[ADMIN] Gerando código:', codigo);
+    console.log('[ADMIN] Duração:', duracao_dias, 'dias');
+    console.log('[ADMIN] Vencimento:', vencimento);
+
+    // SALVAR NO BANCO - SEM created_at (deixa o banco usar default)
     const result = await pool.query(
-      `INSERT INTO codigos (codigo, ativo, duracao_dias, vencimento, notas, created_at)
-       VALUES ($1, true, $2, $3, $4, NOW())
-       RETURNING id, codigo, vencimento`,
-      [codigo, duracao_dias, vencimento, notas]
+      `INSERT INTO codigos (codigo, ativo, duracao_dias, vencimento, notas)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, codigo, vencimento, ativo, duracao_dias`,
+      [codigo, true, parseInt(duracao_dias), vencimento, notas || null]
     );
 
-    console.log('[ADMIN] Código gerado e SALVO no banco:', codigo);
+    console.log('[ADMIN] Código SALVO com sucesso:', result.rows[0]);
 
     res.json({
       ok: true,
       codigo: result.rows[0].codigo,
       vencimento: result.rows[0].vencimento,
-      duracao_dias
+      duracao_dias: result.rows[0].duracao_dias,
+      ativo: result.rows[0].ativo
     });
 
   } catch (err) {
-    console.error('[ADMIN] Erro ao gerar código:', err.message);
+    console.error('[ADMIN] ERRO ao gerar código:', err.message);
+    console.error('[ADMIN] Stack:', err.stack);
     res.status(500).json({ 
       ok: false, 
-      message: 'Erro ao gerar código: ' + err.message 
+      message: 'Erro ao gerar código',
+      erro: err.message
     });
   }
 });
