@@ -72,7 +72,6 @@ app.get('/api/admin/codigos', (req, res) => {
   });
 });
 
-// ⭐ GERAR CÓDIGO - CORRIGIDO (SEM created_at que pode não existir)
 app.post('/api/admin/gerar-codigo', async (req, res) => {
   try {
     const senha = req.headers['x-admin-password'];
@@ -86,19 +85,12 @@ app.post('/api/admin/gerar-codigo', async (req, res) => {
     const vencimento = new Date();
     vencimento.setDate(vencimento.getDate() + duracao_dias);
 
-    console.log('[ADMIN] Gerando código:', codigo);
-    console.log('[ADMIN] Duração:', duracao_dias, 'dias');
-    console.log('[ADMIN] Vencimento:', vencimento);
-
-    // SALVAR NO BANCO - SEM created_at (deixa o banco usar default)
     const result = await pool.query(
       `INSERT INTO codigos (codigo, ativo, duracao_dias, vencimento, notas)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, codigo, vencimento, ativo, duracao_dias`,
       [codigo, true, parseInt(duracao_dias), vencimento, notas || null]
     );
-
-    console.log('[ADMIN] Código SALVO com sucesso:', result.rows[0]);
 
     res.json({
       ok: true,
@@ -110,7 +102,6 @@ app.post('/api/admin/gerar-codigo', async (req, res) => {
 
   } catch (err) {
     console.error('[ADMIN] ERRO ao gerar código:', err.message);
-    console.error('[ADMIN] Stack:', err.stack);
     res.status(500).json({ 
       ok: false, 
       message: 'Erro ao gerar código',
@@ -187,29 +178,43 @@ app.post('/api/check-code', async (req, res) => {
   }
 });
 
+// ⭐ ONBOARDING - CORRIGIDO COM MAIS LOGS
 app.post('/api/onboarding', async (req, res) => {
   try {
     const {
       codigo_id, nome, idade, peso_atual, peso_alvo, altura,
-      sexo, objetivo, nivel, rotina, dias_treino, tempo_treino, refeicoes, local_treino
+      sexo, objetivo, nivel, rotina, dias_treino, tempo_treino, refeicoes
     } = req.body;
 
-    const erros = calculos.validarDados({
-      nome, idade, peso_atual, altura, sexo, objetivo, nivel, rotina, dias_treino, refeicoes
-    });
+    console.log('[ONBOARDING] Dados recebidos:', { codigo_id, nome, idade, peso_atual, altura, sexo, objetivo, nivel });
 
-    if (erros.length > 0) {
-      return res.status(400).json({ ok: false, erros });
-    }
-
+    // Validações básicas
     if (!codigo_id) {
       return res.status(400).json({ ok: false, erro: 'Código inválido' });
     }
 
+    if (!nome || !idade || !peso_atual || !altura || !sexo || !objetivo || !nivel) {
+      return res.status(400).json({ ok: false, erro: 'Dados incompletos' });
+    }
+
+    // Converter para números
+    const idadeNum = parseInt(idade);
+    const pesoNum = parseFloat(peso_atual);
+    const alturaNum = parseInt(altura);
+    const diasNum = parseInt(dias_treino) || 4;
+    const tempoNum = parseInt(tempo_treino) || 60;
+    const refeicoesNum = parseInt(refeicoes) || 4;
+
+    console.log('[ONBOARDING] Calculando protocolo...');
+
+    // Calcular protocolo
     const protocolo = calculos.calcularProtocolo(
-      sexo, peso_atual, altura, idade, rotina, objetivo
+      sexo, pesoNum, alturaNum, idadeNum, rotina, objetivo
     );
 
+    console.log('[ONBOARDING] Protocolo calculado:', protocolo);
+
+    // Verificar se usuário existe
     const checkUser = await pool.query(
       'SELECT id FROM usuarios WHERE codigo_id = $1',
       [codigo_id]
@@ -218,7 +223,9 @@ app.post('/api/onboarding', async (req, res) => {
     let usuario_id;
 
     if (checkUser.rows.length > 0) {
+      console.log('[ONBOARDING] Usuário existe, atualizando...');
       usuario_id = checkUser.rows[0].id;
+      
       await pool.query(
         `UPDATE usuarios SET
           nome=$2, idade=$3, peso_atual=$4, peso_alvo=$5, altura=$6,
@@ -226,11 +233,14 @@ app.post('/api/onboarding', async (req, res) => {
           tempo_treino=$12, refeicoes=$13, tdee=$14, calorias_alvo=$15,
           proteina_g=$16, carbo_g=$17, gordura_g=$18, atualizado_em=NOW()
          WHERE id=$1`,
-        [usuario_id, nome, idade, peso_atual, peso_alvo, altura, sexo, objetivo,
-         nivel, rotina, dias_treino, tempo_treino, refeicoes, protocolo.tdee,
-         protocolo.calorias_alvo, protocolo.proteina_g, protocolo.carbo_g, protocolo.gordura_g]
+        [usuario_id, nome, idadeNum, pesoNum, parseFloat(peso_alvo) || pesoNum, alturaNum, 
+         sexo, objetivo, nivel, rotina, diasNum, tempoNum, refeicoesNum, 
+         protocolo.tdee, protocolo.calorias_alvo, protocolo.proteina_g, 
+         protocolo.carbo_g, protocolo.gordura_g]
       );
     } else {
+      console.log('[ONBOARDING] Criando novo usuário...');
+      
       const result = await pool.query(
         `INSERT INTO usuarios
           (codigo_id, nome, idade, peso_atual, peso_alvo, altura, sexo, objetivo,
@@ -238,11 +248,15 @@ app.post('/api/onboarding', async (req, res) => {
            proteina_g, carbo_g, gordura_g)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
          RETURNING id`,
-        [codigo_id, nome, idade, peso_atual, peso_alvo, altura, sexo, objetivo,
-         nivel, rotina, dias_treino, tempo_treino, refeicoes, protocolo.tdee,
-         protocolo.calorias_alvo, protocolo.proteina_g, protocolo.carbo_g, protocolo.gordura_g]
+        [codigo_id, nome, idadeNum, pesoNum, parseFloat(peso_alvo) || pesoNum, alturaNum, 
+         sexo, objetivo, nivel, rotina, diasNum, tempoNum, refeicoesNum, 
+         protocolo.tdee, protocolo.calorias_alvo, protocolo.proteina_g, 
+         protocolo.carbo_g, protocolo.gordura_g]
       );
       usuario_id = result.rows[0].id;
+
+      console.log('[ONBOARDING] Usuário criado:', usuario_id);
+      console.log('[ONBOARDING] Criando progresso...');
 
       await pool.query(
         `INSERT INTO progresso (usuario_id, tipo, categoria, nivel, fase_atual, proximo_desbloqueio)
@@ -252,6 +266,8 @@ app.post('/api/onboarding', async (req, res) => {
       );
     }
 
+    console.log('[ONBOARDING] Sucesso! Usuário ID:', usuario_id);
+
     res.json({
       ok: true,
       usuario_id,
@@ -259,8 +275,13 @@ app.post('/api/onboarding', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Erro em onboarding:', err.message);
-    res.status(500).json({ ok: false, erro: 'Erro ao salvar dados' });
+    console.error('[ONBOARDING] ERRO CRÍTICO:', err.message);
+    console.error('[ONBOARDING] Stack:', err.stack);
+    res.status(500).json({ 
+      ok: false, 
+      erro: 'Erro ao salvar dados',
+      message: err.message 
+    });
   }
 });
 
