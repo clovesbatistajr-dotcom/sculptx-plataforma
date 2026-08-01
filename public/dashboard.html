@@ -1,3 +1,4 @@
+cat > dashboard.html << 'ENDFILE'
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -75,7 +76,7 @@
                         <div class="tool-icon"></div>
                         <h4>Seu Treino</h4>
                         <p>Estruturado em fases progressivas de 2 meses</p>
-                        <button class="btn-primary" onclick="abrirAbreve('treino')">
+                        <button class="btn-primary" onclick="irParaTreino()">
                             Acessar Treino →
                         </button>
                     </div>
@@ -85,7 +86,7 @@
                         <div class="tool-icon"></div>
                         <h4>Sua Dieta</h4>
                         <p>Com 3 opções por refeição e substituições</p>
-                        <button class="btn-primary" onclick="abrirAbreve('dieta')">
+                        <button class="btn-primary" onclick="irParaDieta()">
                             Ver Dieta →
                         </button>
                     </div>
@@ -95,7 +96,7 @@
                         <div class="tool-icon"></div>
                         <h4>Suplementação</h4>
                         <p>Protocolo otimizado para seu objetivo</p>
-                        <button class="btn-primary" onclick="abrirAbreve('suplementacao')">
+                        <button class="btn-primary" onclick="irParaSupplementacao()">
                             Ver Suplementos →
                         </button>
                     </div>
@@ -131,17 +132,13 @@
         // Carregar dados do usuário
         async function loadUserData() {
             try {
-                const response = await fetch(`/api/usuario/${codigo_id}`);
-                const data = await response.json();
-
-                if (!data.ok) {
+                const usuario = JSON.parse(sessionStorage.getItem('usuario'));
+                
+                if (!usuario) {
                     window.location.href = '/onboarding.html';
                     return;
                 }
 
-                const usuario = data.usuario;
-
-                // Preencher dados
                 document.getElementById('userNameDisplay').textContent = usuario.nome;
                 document.getElementById('objectiveDisplay').textContent = usuario.objetivo;
                 document.getElementById('levelDisplay').textContent = usuario.nivel;
@@ -152,7 +149,6 @@
                 document.getElementById('carbDisplay').textContent = usuario.carbo_g;
                 document.getElementById('fatDisplay').textContent = usuario.gordura_g;
 
-                // Calcular validade (60 dias)
                 const dataInicio = new Date(usuario.criado_em);
                 const dataVencimento = new Date(dataInicio);
                 dataVencimento.setDate(dataVencimento.getDate() + 60);
@@ -169,29 +165,21 @@
                 
                 document.getElementById('validityDisplay').textContent = textoValidade;
 
-                // Salvar em sessão
-                sessionStorage.setItem('usuario', JSON.stringify(usuario));
-
             } catch (err) {
                 console.error('Erro ao carregar dados:', err);
-                alert('Erro ao carregar dados. Tente novamente.');
             }
         }
 
-        function abrirAbreve(tipo) {
-            const titulos = {
-                'treino': ' Seu Treino Personalizado',
-                'dieta': ' Sua Dieta Personalizada',
-                'suplementacao': ' Seu Protocolo de Suplementação'
-            };
+        function irParaTreino() {
+            window.location.href = '/treino.html';
+        }
 
-            const mensagens = {
-                'treino': 'Em desenvolvimento! Você receberá um programa de treino em 30 fases progressivas de 2 meses cada, com exercícios específicos para seu objetivo e nível.',
-                'dieta': 'Em desenvolvimento! Seu plano alimentar será dividido em refeições com 3 opções diferentes por refeição, além de substituições personalizadas.',
-                'suplementacao': 'Em desenvolvimento! Você receberá um protocolo otimizado com Whey Protein, Ômega 3, Creatina e Multivitamínico.'
-            };
+        function irParaDieta() {
+            window.location.href = '/dieta.html';
+        }
 
-            alert(`${titulos[tipo]}\n\n${mensagens[tipo]}`);
+        function irParaSupplementacao() {
+            window.location.href = '/suplementacao.html';
         }
 
         function fazerLogout() {
@@ -199,8 +187,8 @@
             window.location.href = '/';
         }
 
-        // Carregar ao abrir
         loadUserData();
     </script>
 </body>
 </html>
+ENDFILE
