@@ -3,481 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo de Suplementação | SculptX</title>
+    <title>Protocolo de Suplementação - SculptX</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1f2e;
-            min-height: 100vh;
-            padding: 20px;
-            color: #fff;
-        }
-
-        .container {
+        .suplementacao-container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
+            background: #1a1f2e;
+            min-height: 100vh;
         }
 
-        .header {
-            background: #2d3748;
-            border-radius: 20px;
-            padding: 30px;
+        .suplementacao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .header h1 {
-            color: #fff;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-
-        .header p {
-            color: #a0aec0;
-            margin-top: 10px;
-        }
-
-        .aviso-importante {
-            background: #745c3f;
-            border-left: 5px solid #d4a574;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            color: #e8d4c0;
-            font-size: 14px;
-        }
-
-        .objetivo-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #2d9d78 0%, #1e7e5f 100%);
+        .suplementacao-header h1 {
             color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin-top: 15px;
-            font-weight: bold;
-            font-size: 14px;
+            font-size: 2rem;
+            margin: 0;
         }
 
-        .abas {
+        .btn-voltar {
+            background: #2d9d78;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-voltar:hover {
+            background: #1e7a5e;
+        }
+
+        .filtros {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
         }
 
-        .aba-btn {
-            padding: 12px 24px;
+        .filtro-btn {
             background: #2d3748;
-            color: #2d9d78;
-            border: 2px solid #2d9d78;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
+            color: #ccc;
+            border: 2px solid #444;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
             transition: all 0.3s ease;
         }
 
-        .aba-btn.ativo {
-            background: linear-gradient(135deg, #2d9d78 0%, #1e7e5f 100%);
+        .filtro-btn.ativo {
+            background: #2d9d78;
             color: white;
+            border-color: #2d9d78;
         }
 
-        .aba-btn:hover {
-            transform: translateY(-2px);
+        .filtro-btn:hover {
+            border-color: #2d9d78;
         }
 
-        .suplementos-container {
-            display: flex;
-            flex-direction: column;
+        .suplementos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
         }
 
         .suplemento-card {
             background: #2d3748;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            border-left: 5px solid #2d9d78;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #444;
             transition: all 0.3s ease;
         }
 
         .suplemento-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(45, 157, 120, 0.3);
+            border-color: #2d9d78;
+            box-shadow: 0 0 20px rgba(45, 157, 120, 0.2);
         }
 
         .suplemento-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #4a5568;
+            background: linear-gradient(135deg, #2d9d78, #1e7a5e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .suplemento-emoji {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
         .suplemento-nome {
-            font-size: 22px;
-            font-weight: bold;
-            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
         }
 
         .suplemento-categoria {
-            display: inline-block;
-            background: #4a5568;
-            color: #a0aec0;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 0.85rem;
+            opacity: 0.9;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+        .suplemento-content {
+            padding: 20px;
         }
 
-        .info-box {
-            background: #374151;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #2d9d78;
+        .info-row {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .info-label {
-            font-size: 12px;
-            color: #a0aec0;
+            color: #999;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .info-valor {
-            font-size: 18px;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .beneficios {
-            margin-bottom: 20px;
-        }
-
-        .beneficios-titulo {
-            font-size: 14px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .beneficios-lista {
-            list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .beneficio-item {
-            background: linear-gradient(135deg, #2d9d78 0%, #1e7e5f 100%);
-            color: white;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 13px;
+            margin-bottom: 5px;
             font-weight: 600;
         }
 
-        .notas-importantes {
-            background: #374151;
-            border-left: 4px solid #2d9d78;
-            padding: 15px;
+        .info-valor {
+            color: white;
+            font-size: 1rem;
+        }
+
+        .beneficios {
+            background: #1a1f2e;
             border-radius: 8px;
-            color: #a0aec0;
-            font-size: 14px;
-            line-height: 1.6;
+            padding: 15px;
+            margin-top: 15px;
         }
 
-        .botao-voltar {
-            margin-bottom: 20px;
-            padding: 12px 24px;
-            background: transparent;
+        .beneficio-titulo {
             color: #2d9d78;
-            border: 2px solid #2d9d78;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .botao-voltar:hover {
-            background: #2d9d78;
-            color: white;
-        }
-
-        .vazio {
-            text-align: center;
-            padding: 40px 20px;
-            color: #a0aec0;
-            font-size: 16px;
-        }
-
-        .recomendacao-especial {
-            background: linear-gradient(135deg, #2d9d78 0%, #1e7e5f 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-
-        .recomendacao-especial h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            font-weight: 600;
             margin-bottom: 10px;
-            font-size: 18px;
         }
 
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .beneficio-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-            .suplemento-nome {
-                font-size: 18px;
-            }
+        .beneficio-lista li {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            padding-left: 15px;
+            position: relative;
+        }
 
-            .abas {
-                justify-content: flex-start;
-            }
+        .beneficio-lista li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #2d9d78;
+            font-weight: bold;
+        }
+
+        .protocolo-objetivo {
+            background: #2d3748;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid #2d9d78;
+        }
+
+        .protocolo-titulo {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .protocolo-recomendacao {
+            background: #1a1f2e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .recomendacao-titulo {
+            color: #2d9d78;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .recomendacao-texto {
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <button class="botao-voltar" onclick="window.location.href='dashboard.html'">← Voltar ao Dashboard</button>
-
-        <div class="header">
+    <div class="suplementacao-container">
+        <div class="suplementacao-header">
             <h1>💊 Protocolo de Suplementação</h1>
-            <p>Suplementos recomendados conforme seu objetivo e nível de atividade</p>
-            
-            <div class="objetivo-badge" id="objetivoBadge">Carregando objetivo...</div>
-
-            <div class="aviso-importante">
-                ⚠️ <strong>Aviso Importante:</strong> Consulte um médico ou nutricionista antes de iniciar qualquer protocolo de suplementação.
-            </div>
+            <a href="/dashboard.html" class="btn-voltar">← Voltar ao Dashboard</a>
         </div>
 
-        <div class="abas">
-            <button class="aba-btn ativo" onclick="filtrarSuplementos('todos')">Todos</button>
-            <button class="aba-btn" onclick="filtrarSuplementos('basicos')">Básicos</button>
-            <button class="aba-btn" onclick="filtrarSuplementos('proteina')">Proteína</button>
-            <button class="aba-btn" onclick="filtrarSuplementos('creatina')">Força</button>
-            <button class="aba-btn" onclick="filtrarSuplementos('vitaminas')">Vitaminas</button>
-        </div>
+        <div class="filtros" id="filtros"></div>
+        
+        <div class="suplementos-grid" id="suplementos"></div>
 
-        <div class="recomendacao-especial" id="recomendacaoEspecial">
-            <h3>🎯 Recomendação Personalizada</h3>
-            <p id="textoRecomendacao">Carregando recomendação conforme seu objetivo...</p>
-        </div>
-
-        <div class="suplementos-container" id="suplementosContainer">
-            <p class="vazio">Carregando protocolo de suplementação...</p>
-        </div>
+        <div class="protocolo-objetivo" id="protocolo-recomendado"></div>
     </div>
 
     <script>
-        const suplementosPadroes = {
-            basicos: [
-                {
-                    nome: 'Multivitamínico',
-                    categoria: 'Vitaminas',
-                    dosagem: '1-2 tabletes',
-                    horario: 'Manhã (com café da manhã)',
-                    beneficios: ['Imunidade', 'Energia', 'Saúde Geral'],
-                    notas: 'Essencial para preencher gaps nutricionais'
-                },
-                {
-                    nome: 'Ômega 3',
-                    categoria: 'Óleo de Peixe',
-                    dosagem: '2-3g EPA+DHA',
-                    horario: 'Almoço ou Janta',
-                    beneficios: ['Coração', 'Cérebro', 'Inflamação'],
-                    notas: 'Melhora recuperação e saúde cardiovascular'
-                }
-            ],
-            proteina: [
-                {
-                    nome: 'Whey Protein',
-                    categoria: 'Proteína',
-                    dosagem: '25-40g por dose',
-                    horario: 'Pós-treino + 1-2 cafés da manhã',
-                    beneficios: ['Ganho Muscular', 'Recuperação', 'Saciedade'],
-                    notas: 'Use em shake com frutas ou aveia'
-                },
-                {
-                    nome: 'Caseína',
-                    categoria: 'Proteína',
-                    dosagem: '25-40g por dose',
-                    horario: 'Antes de dormir',
-                    beneficios: ['Digestão Lenta', 'Catabolismo', 'Noturno'],
-                    notas: 'Protege músculos durante o sono'
-                }
-            ],
-            creatina: [
-                {
-                    nome: 'Creatina Monohidratada',
-                    categoria: 'Força',
-                    dosagem: '5g por dia',
-                    horario: 'Qualquer hora (com carboidrato)',
-                    beneficios: ['Força', 'Potência', 'Ganho Muscular'],
-                    notas: 'Melhor resultado com consistência. Beba muita água.'
-                },
-                {
-                    nome: 'Beta-Alanina',
-                    categoria: 'Força',
-                    dosagem: '3-5g por dia',
-                    horario: 'Dividido em 2-3 doses',
-                    beneficios: ['Resistência', 'Fadiga', 'Volume Muscular'],
-                    notas: 'Pode causar formigamento (normal)'
-                }
-            ],
-            vitaminas: [
-                {
-                    nome: 'Vitamina D3',
-                    categoria: 'Vitamina',
-                    dosagem: '1000-4000 IU',
-                    horario: 'Manhã (com gordura)',
-                    beneficios: ['Imunidade', 'Ossos', 'Humor'],
-                    notas: 'Especialmente importante em climas frios/dias nublados'
-                },
-                {
-                    nome: 'Vitamina C',
-                    categoria: 'Vitamina',
-                    dosagem: '500-1000mg',
-                    horario: 'Manhã e à noite',
-                    beneficios: ['Imunidade', 'Antioxidante', 'Absorção Ferro'],
-                    notas: 'Melhora recuperação pós-treino'
-                }
-            ]
+        const usuario = JSON.parse(sessionStorage.getItem('usuario'));
+        
+        if (!usuario) {
+            window.location.href = '/onboarding.html';
+        }
+
+        const suplementos = {
+            'Whey Protein': {
+                categoria: 'Proteína',
+                emoji: '🥛',
+                dosagem: '30-40g',
+                horario: 'Pós-treino',
+                beneficios: ['Recuperação muscular', 'Ganho de massa', 'Síntese proteica'],
+                indicado: ['hipertrofia', 'definição']
+            },
+            'Creatina': {
+                categoria: 'Performance',
+                emoji: '⚡',
+                dosagem: '5g',
+                horario: 'Diariamente',
+                beneficios: ['Força e resistência', 'Ganho muscular', 'Rendimento'],
+                indicado: ['hipertrofia']
+            },
+            'BCAA': {
+                categoria: 'Aminoácidos',
+                emoji: '💪',
+                dosagem: '5-10g',
+                horario: 'Pré e pós-treino',
+                beneficios: ['Recuperação', 'Prevenção catabolismo', 'Energia'],
+                indicado: ['hipertrofia', 'definição']
+            },
+            'Ômega 3': {
+                categoria: 'Saúde',
+                emoji: '🐟',
+                dosagem: '2-3g',
+                horario: 'Com refeições',
+                beneficios: ['Saúde cardiovascular', 'Anti-inflamatório', 'Cognição'],
+                indicado: ['hipertrofia', 'definição']
+            },
+            'Multivitamínico': {
+                categoria: 'Micronutrientes',
+                emoji: '🌈',
+                dosagem: '1 dose',
+                horario: 'Café da manhã',
+                beneficios: ['Imunidade', 'Energia', 'Saúde geral'],
+                indicado: ['hipertrofia', 'definição']
+            },
+            'Cafeína': {
+                categoria: 'Estimulante',
+                emoji: '☕',
+                dosagem: '100-200mg',
+                horario: 'Pré-treino',
+                beneficios: ['Energia', 'Foco', 'Queima de gordura'],
+                indicado: ['definição', 'hipertrofia']
+            },
+            'Beta-Alanina': {
+                categoria: 'Performance',
+                emoji: '🔥',
+                dosagem: '3-5g',
+                horario: 'Distribuída no dia',
+                beneficios: ['Resistência', 'Reduz fadiga', 'Hipertrofia'],
+                indicado: ['hipertrofia']
+            },
+            'Glutamina': {
+                categoria: 'Aminoácidos',
+                emoji: '🛡️',
+                dosagem: '5-10g',
+                horario: 'Pós-treino',
+                beneficios: ['Recuperação', 'Imunidade', 'Força'],
+                indicado: ['hipertrofia']
+            }
         };
 
-        let abaAtualFiltrada = 'todos';
+        // Renderizar filtros
+        const categoriasUnicas = [...new Set(Object.values(suplementos).map(s => s.categoria))];
+        const filtrosDiv = document.getElementById('filtros');
 
-        async function carregarSuplementacao() {
-            try {
-                const usuarioData = localStorage.getItem('usuarioData');
+        filtrosDiv.innerHTML = '<button class="filtro-btn ativo" data-filtro="todos">Todos</button>';
+        categoriasUnicas.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'filtro-btn';
+            btn.textContent = cat;
+            btn.dataset.filtro = cat.toLowerCase();
+            filtrosDiv.appendChild(btn);
+        });
 
-                if (!usuarioData) {
-                    document.getElementById('suplementosContainer').innerHTML = 
-                        '<p class="vazio">Erro: Dados não encontrados.</p>';
-                    return;
-                }
+        // Renderizar suplementos
+        function renderizarSuplemientos(filtro = 'todos') {
+            const container = document.getElementById('suplementos');
+            container.innerHTML = '';
 
-                const usuario = JSON.parse(usuarioData);
+            Object.entries(suplementos).forEach(([nome, dados]) => {
+                if (filtro !== 'todos' && dados.categoria.toLowerCase() !== filtro) return;
 
-                document.getElementById('objetivoBadge').textContent = `Objetivo: ${usuario.objetivo || 'Não definido'}`;
-                gerarRecomendacao(usuario.objetivo, usuario.nivel);
-
-                renderizarSuplementos('todos');
-
-            } catch (err) {
-                console.error('Erro ao carregar suplementação:', err);
-                document.getElementById('suplementosContainer').innerHTML = 
-                    `<p class="vazio">Erro: ${err.message}</p>`;
-            }
-        }
-
-        function gerarRecomendacao(objetivo, nivel) {
-            const recomendacoes = {
-                'Emagrecimento': '⚡ Foque em: Multivitamínico, Ômega 3, Vitamina D. Considere termogênicos naturais como chá verde.',
-                'Ganho Muscular': '🏋️ Foque em: Whey Protein, Creatina, Beta-Alanina. Essencial para hipertrofia otimizada.',
-                'Definição': '💪 Foque em: Whey Protein, Vitaminas, Ômega 3. Mantenha proteína e micronutrientes elevados.',
-                'Recomposição': '⚖️ Foque em: Whey Protein, Creatina, Multivitamínico. Balanceie proteína com micronutrientes.',
-                'Saúde Geral': '❤️ Foque em: Multivitamínico, Ômega 3, Vitamina D. Invista em saúde preventiva.'
-            };
-
-            const texto = recomendacoes[objetivo] || 'Mantenha uma suplementação baseada em suas necessidades nutricionais individuais.';
-            document.getElementById('textoRecomendacao').textContent = texto;
-        }
-
-        function renderizarSuplementos(filtro = 'todos') {
-            let suplementos = [];
-
-            if (filtro === 'todos') {
-                suplementos = [
-                    ...suplementosPadroes.basicos,
-                    ...suplementosPadroes.proteina,
-                    ...suplementosPadroes.creatina,
-                    ...suplementosPadroes.vitaminas
-                ];
-            } else if (suplementosPadroes[filtro]) {
-                suplementos = suplementosPadroes[filtro];
-            }
-
-            if (suplementos.length === 0) {
-                document.getElementById('suplementosContainer').innerHTML = 
-                    '<p class="vazio">Nenhum suplemento nesta categoria.</p>';
-                return;
-            }
-
-            let html = '';
-
-            suplementos.forEach(sup => {
-                html += `
+                const estaIndicado = dados.indicado.includes(usuario.objetivo.toLowerCase());
+                
+                const html = `
                     <div class="suplemento-card">
                         <div class="suplemento-header">
-                            <div>
-                                <div class="suplemento-nome">${sup.nome}</div>
-                                <div class="suplemento-categoria">${sup.categoria}</div>
-                            </div>
+                            <div class="suplemento-emoji">${dados.emoji}</div>
+                            <div class="suplemento-nome">${nome}</div>
+                            <div class="suplemento-categoria">${dados.categoria}</div>
                         </div>
-
-                        <div class="info-grid">
-                            <div class="info-box">
-                                <div class="info-label">💊 Dosagem</div>
-                                <div class="info-valor">${sup.dosagem}</div>
+                        <div class="suplemento-content">
+                            <div class="info-row">
+                                <div class="info-label">Dosagem</div>
+                                <div class="info-valor">${dados.dosagem}</div>
                             </div>
-                            <div class="info-box">
-                                <div class="info-label">⏰ Horário</div>
-                                <div class="info-valor" style="font-size: 14px;">${sup.horario}</div>
+                            <div class="info-row">
+                                <div class="info-label">Horário Ideal</div>
+                                <div class="info-valor">${dados.horario}</div>
                             </div>
-                        </div>
-
-                        <div class="beneficios">
-                            <div class="beneficios-titulo">Benefícios Principais</div>
-                            <ul class="beneficios-lista">
-                                ${sup.beneficios.map(b => `<li class="beneficio-item">✓ ${b}</li>`).join('')}
-                            </ul>
-                        </div>
-
-                        <div class="notas-importantes">
-                            <strong>📌 Nota:</strong> ${sup.notas}
+                            <div class="beneficios">
+                                <div class="beneficio-titulo">Benefícios</div>
+                                <ul class="beneficio-lista">
+                                    ${dados.beneficios.map(b => `<li>${b}</li>`).join('')}
+                                </ul>
+                            </div>
+                            ${estaIndicado ? '<div style="background: #2d9d78; color: white; padding: 8px 12px; border-radius: 6px; margin-top: 10px; font-size: 0.85rem; font-weight: 600; text-align: center;">✓ Recomendado para seu objetivo</div>' : ''}
                         </div>
                     </div>
                 `;
-            });
 
-            document.getElementById('suplementosContainer').innerHTML = html;
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                container.appendChild(div);
+            });
         }
 
-        function filtrarSuplementos(filtro) {
-            document.querySelectorAll('.aba-btn').forEach(btn => {
-                btn.classList.remove('ativo');
+        // Filtros
+        document.querySelectorAll('.filtro-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+                btn.classList.add('ativo');
+                renderizarSuplemientos(btn.dataset.filtro);
             });
-            event.target.classList.add('ativo');
+        });
 
-            abaAtualFiltrada = filtro;
-            renderizarSuplementos(filtro);
+        // Protocolo recomendado
+        function gerarProtocoloRecomendado() {
+            const objetivo = usuario.objetivo.toLowerCase();
+            let suplementosRecomendados = Object.entries(suplementos)
+                .filter(([, dados]) => dados.indicado.includes(objetivo))
+                .map(([nome]) => nome);
+
+            let titulo, descricao;
+
+            if (objetivo === 'hipertrofia') {
+                titulo = 'Protocolo para Ganho de Massa';
+                descricao = 'Foco em recuperação, síntese proteica e performance no treino.';
+            } else {
+                titulo = 'Protocolo para Definição';
+                descricao = 'Foco em energia, preservação muscular e otimização do metabolismo.';
+            }
+
+            const html = `
+                <div class="protocolo-titulo">📋 ${titulo}</div>
+                <p style="color: #ccc; margin-bottom: 20px;">${descricao}</p>
+                
+                ${suplementosRecomendados.map((nome, i) => {
+                    const dados = suplementos[nome];
+                    return `
+                        <div class="protocolo-recomendacao">
+                            <div class="recomendacao-titulo">${i + 1}. ${nome}</div>
+                            <div class="recomendacao-texto">
+                                <strong>Dosagem:</strong> ${dados.dosagem} | 
+                                <strong>Horário:</strong> ${dados.horario}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+
+            document.getElementById('protocolo-recomendado').innerHTML = html;
         }
 
-        carregarSuplementacao();
+        renderizarSuplemientos();
+        gerarProtocoloRecomendado();
     </script>
 </body>
 </html>
