@@ -21,48 +21,10 @@
             <section class="welcome-section">
                 <div class="welcome-text">
                     <h2>Bem-vindo, <span id="userNameDisplay">Usuário</span></h2>
-                    <p>Seu protocolo personalizado está pronto</p>
+                    <p style="font-size: 1.05rem; color: rgba(255,255,255,0.95); font-weight: 600; margin-top: 8px;">Protocolo desenvolvido por Clóves</p>
+                    <p style="font-size: 0.88rem; color: rgba(255,255,255,0.85); margin-top: 4px;">Personal Trainer • Nutricionista</p>
                 </div>
                 <img src="assets/cloves.png" alt="Coach" class="coach-photo">
-            </section>
-
-            <!-- STATS SECTION -->
-            <section class="stats-section">
-                <div class="stat-card">
-                    <div class="stat-label">Objetivo</div>
-                    <div class="stat-value" id="objectiveDisplay">-</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Nível</div>
-                    <div class="stat-value" id="levelDisplay">-</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Dias de Treino</div>
-                    <div class="stat-value" id="daysDisplay">-</div>
-                </div>
-            </section>
-
-            <!-- NUTRIÇÃO STATS -->
-            <section class="nutrition-stats">
-                <h3>Seu Protocolo Nutricional Diário</h3>
-                <div class="nutrition-grid">
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">Calorias Alvo</span>
-                        <span class="nutrition-value" id="caloriesDisplay">-</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">Proteína</span>
-                        <span class="nutrition-value" id="proteinDisplay">-</span> <span class="nutrition-unit">g</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">Carboidrato</span>
-                        <span class="nutrition-value" id="carbDisplay">-</span> <span class="nutrition-unit">g</span>
-                    </div>
-                    <div class="nutrition-item">
-                        <span class="nutrition-label">Gordura</span>
-                        <span class="nutrition-value" id="fatDisplay">-</span> <span class="nutrition-unit">g</span>
-                    </div>
-                </div>
             </section>
 
             <!-- TOOLS SECTION -->
@@ -149,14 +111,6 @@
                 }
 
                 document.getElementById('userNameDisplay').textContent = usuario.nome;
-                document.getElementById('objectiveDisplay').textContent = usuario.objetivo;
-                document.getElementById('levelDisplay').textContent = usuario.nivel;
-                document.getElementById('daysDisplay').textContent = usuario.dias_treino + ' dias';
-                
-                document.getElementById('caloriesDisplay').textContent = usuario.calorias_alvo;
-                document.getElementById('proteinDisplay').textContent = usuario.proteina_g;
-                document.getElementById('carbDisplay').textContent = usuario.carbo_g;
-                document.getElementById('fatDisplay').textContent = usuario.gordura_g;
 
                 const dataInicio = new Date(usuario.criado_em);
                 const dataVencimento = new Date(dataInicio);
