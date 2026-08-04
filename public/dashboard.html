@@ -1,4 +1,3 @@
-cat > dashboard.html << 'ENDFILE'
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -100,6 +99,16 @@ cat > dashboard.html << 'ENDFILE'
                             Ver Suplementos →
                         </button>
                     </div>
+
+                    <!-- RECEITAS -->
+                    <div class="tool-card">
+                        <div class="tool-icon"></div>
+                        <h4>Receitas Fit</h4>
+                        <p>80 receitas divididas em 4 categorias</p>
+                        <button class="btn-primary" onclick="irParaReceitas()">
+                            Ver Receitas →
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -182,6 +191,10 @@ cat > dashboard.html << 'ENDFILE'
             window.location.href = '/suplementacao.html';
         }
 
+        function irParaReceitas() {
+            window.location.href = '/receitas.html';
+        }
+
         function fazerLogout() {
             sessionStorage.clear();
             window.location.href = '/';
@@ -191,4 +204,3 @@ cat > dashboard.html << 'ENDFILE'
     </script>
 </body>
 </html>
-ENDFILE
