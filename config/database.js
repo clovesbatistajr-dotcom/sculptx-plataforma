@@ -90,14 +90,9 @@ async function initDatabase() {
       await adicionarColunaSeNaoExistir(client, 'usuarios', 'carbo_g', 'INTEGER');
       await adicionarColunaSeNaoExistir(client, 'usuarios', 'gordura_g', 'INTEGER');
       await adicionarColunaSeNaoExistir(client, 'usuarios', 'rotina', 'VARCHAR(50)');
-      await adicionarColunaSeNaoExistir(client, 'usuarios', 'tempo_treino', 'VARCHAR(50)');
+      await adicionarColunaSeNaoExistir(client, 'usuarios', 'tempo_treino', 'INTEGER');
       await adicionarColunaSeNaoExistir(client, 'usuarios', 'refeicoes', 'INTEGER');
       await adicionarColunaSeNaoExistir(client, 'usuarios', 'atualizado_em', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
-      // ── NOVAS COLUNAS (04/08) ──
-      await adicionarColunaSeNaoExistir(client, 'usuarios', 'local_treino', 'VARCHAR(50)');
-      await adicionarColunaSeNaoExistir(client, 'usuarios', 'email', 'VARCHAR(100)');
-      await adicionarColunaSeNaoExistir(client, 'usuarios', 'whatsapp', 'VARCHAR(20)');
-      await adicionarColunaSeNaoExistir(client, 'usuarios', 'criado_em', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
     }
 
     // Verificar tabela PROGRESSO
@@ -168,8 +163,7 @@ async function initDatabase() {
         nivel VARCHAR(50),
         rotina VARCHAR(50),
         dias_treino INTEGER,
-        tempo_treino VARCHAR(50),
-        local_treino VARCHAR(50),
+        tempo_treino INTEGER,
         refeicoes INTEGER,
         tdee INTEGER,
         calorias_alvo INTEGER,
@@ -216,7 +210,7 @@ async function initDatabase() {
     `);
     console.log('  ✅ Logs pronta\n');
 
-    // Tabela ALIMENTOS
+    // Tabela ALIMENTOS (NOVA)
     console.log('📋 Tabela: alimentos');
     await client.query(`
       CREATE TABLE IF NOT EXISTS alimentos (
@@ -233,7 +227,7 @@ async function initDatabase() {
     `);
     console.log('  ✅ Alimentos pronta\n');
 
-    // Tabela EXERCICIOS
+    // Tabela EXERCICIOS (NOVA)
     console.log('📋 Tabela: exercicios');
     await client.query(`
       CREATE TABLE IF NOT EXISTS exercicios (
@@ -252,7 +246,7 @@ async function initDatabase() {
     `);
     console.log('  ✅ Exercicios pronta\n');
 
-    // Tabela CARDIO
+    // Tabela CARDIO (NOVA)
     console.log('📋 Tabela: cardio');
     await client.query(`
       CREATE TABLE IF NOT EXISTS cardio (
@@ -266,7 +260,7 @@ async function initDatabase() {
     `);
     console.log('  ✅ Cardio pronta\n');
 
-    // Tabela FASES_TREINO
+    // Tabela FASES_TREINO (NOVA)
     console.log('📋 Tabela: fases_treino');
     await client.query(`
       CREATE TABLE IF NOT EXISTS fases_treino (
