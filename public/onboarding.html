@@ -204,6 +204,10 @@
                 sessionStorage.setItem('usuario_id', result.usuario_id);
                 sessionStorage.setItem('usuario_dados', JSON.stringify(dados));
 
+                // CORREÇÃO: salvar também na chave 'usuario' que o dashboard procura
+                const usuarioCompleto = { ...dados, ...(result.usuario || result) };
+                sessionStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
+
                 loadingMessage.textContent = '✅ Protocolo gerado! Redirecionando...';
                 setTimeout(() => {
                     window.location.href = '/dashboard.html';
